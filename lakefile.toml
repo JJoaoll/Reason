@@ -1,0 +1,10 @@
+name = "Reason"
+version = "0.1.0"
+defaultTargets = ["reason"]
+
+[[lean_lib]]
+name = "Reason"
+
+[[lean_exe]]
+name = "reason"
+root = "Main"
