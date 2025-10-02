@@ -1,12 +1,23 @@
+import Lean
+-- open Lean
+#print Lean.Expr
 
-inductive Expr where
-  | lit ()
-  | var (name : String)
+inductive Lit
+  | LInt   (a : Int)
+  | LChar  (c : Char)
+  | LFLoat (x : Float)
 deriving Repr, BEq, Inhabited
 
 structure Typε where
   name : String
   args : List Typε
+deriving Repr, BEq, Inhabited
+
+inductive Expr
+  | lit (lit : Lit)
+  | var (name : String)
+  | app (func arg : Expr)
+  | lam (name : String) (t : Typε) (body : Expr) -- no binder info for while
 deriving Repr, BEq, Inhabited
 
 structure ConstrDef where
@@ -29,4 +40,4 @@ structure Program where
   entryPoint : Term -- main
   terms : List Term
   types : List Typε
-deriving Repr, DecidableEq, Inhabited
+deriving Repr, BEq, Inhabited
