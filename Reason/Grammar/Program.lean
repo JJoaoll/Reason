@@ -1,43 +1,31 @@
-import Lean
--- open Lean
-#print Lean.Expr
+import Reason.Grammar.Expr
+import Reason.Grammar.Typε
+import Reason.Grammar.Sttm
 
-inductive Lit
-  | LInt   (a : Int)
-  | LChar  (c : Char)
-  | LFLoat (x : Float)
-deriving Repr, BEq, Inhabited
+open Expr Typε Sttm
 
-structure Typε where
-  name : String
-  args : List Typε
-deriving Repr, BEq, Inhabited
+/-
+Int sum(Int x, Int y, Int z) {
 
-inductive Expr
-  | lit (lit : Lit)
-  | var (name : String)
-  | app (func arg : Expr)
-  | lam (name : String) (t : Typε) (body : Expr) -- no binder info for while
-deriving Repr, BEq, Inhabited
 
-structure ConstrDef where
-  name   : String
-  params : List Typε
-deriving Repr, BEq, Inhabited
+}
+-/
+structure Fun where
+  rtrn_type : Typε
+  name      : String
+  params    : Array (Typε × String)
+  block     : Block
+deriving Repr, BEq
 
-structure TypεDef where
-  name   : String
-  params : List String
-  cnstrs : List ConstrDef
+-- inductive TypeDef
+--   | strucutre
+--   | variant
 
-structure Term where
-  name : String
-  typε : Typε
-  val  : Expr
-deriving Repr, BEq, Inhabited
 
-structure Program where
-  entryPoint : Term -- main
-  terms : List Term
-  types : List Typε
-deriving Repr, BEq, Inhabited
+
+-- structure Program where
+--   funs : Array Fun
+
+
+--   -- types : List Typε
+-- deriving Repr, BEq, Inhabited
