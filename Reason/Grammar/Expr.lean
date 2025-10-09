@@ -13,7 +13,7 @@ deriving Repr, BEq
 
 inductive UnOp
   | Not -- not True
-  | Neg -- -3
+  -- | Neg -- -3
 
   | IsLower
   | IsUpper

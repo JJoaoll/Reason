@@ -44,18 +44,16 @@ def pliteral : Parser Expr :=
 def pvar : Parser Expr
   := EVar <$> psnake_case
 
-  -- | EUnOp (op : UnOp) (t : Expr)
-  -- | EBinOp (op : BinOp) (l r : Expr)
-mutual
+mutual -- some AI and some Not
 
 -- Parse unary operators (but not negative numbers to avoid conflict)
 partial def punOp : Parser Expr := do
   let op <- choice [
-    Expr.UnOp.Not <$ skipString "not",
-    Expr.UnOp.IsLower <$ skipString "isLower",
-    Expr.UnOp.IsUpper <$ skipString "isUpper",
-    Expr.UnOp.Get <$ skipString "get",
-    Expr.UnOp.Put <$ skipString "put"
+    .Not     <$ skipString "not",
+    .IsLower <$ skipString "isLower",
+    .IsUpper <$ skipString "isUpper",
+    -- .Get     <$ skipString "get",
+    -- .Put     <$ skipString "put"
   ]
   ws
   let expr <- pterm
@@ -81,9 +79,9 @@ partial def pmulLevel : Parser Expr := do
   ws
   let rest <- many do
     let op <- choice [
-      Expr.BinOp.Mul <$ skipChar '*',
-      Expr.BinOp.Div <$ skipChar '/',
-      Expr.BinOp.Rem <$ skipChar '%'
+      .Mul <$ skipChar '*',
+      .Div <$ skipChar '/',
+      .Rem <$ skipChar '%'
     ]
     ws
     let right <- pterm
@@ -98,8 +96,8 @@ partial def paddLevel : Parser Expr := do
   ws
   let rest <- many do
     let op <- choice [
-      Expr.BinOp.Add <$ skipChar '+',
-      Expr.BinOp.Sub <$ skipChar '-'
+      .Add <$ skipChar '+',
+      .Sub <$ skipChar '-'
     ]
     ws
     let right <- pmulLevel
@@ -109,19 +107,20 @@ partial def paddLevel : Parser Expr := do
   return rest.foldl (fun acc (op, right) => EBinOp op acc right) left
 
 -- Parse comparison and logical operators (lowest precedence)
-partial def pbinOp : Parser Expr := do
+-- TODO: missing NEQ
+partial def pop : Parser Expr := do
   let left <- paddLevel
   ws
   let rest <- many do
     let op <- choice [
-      Expr.BinOp.And <$ skipString "and",
-      Expr.BinOp.Or <$ skipString "or",
-      Expr.BinOp.Cat <$ skipString "++",
-      Expr.BinOp.LT <$ skipString "<",
-      Expr.BinOp.LEQ <$ skipString "<=",
-      Expr.BinOp.EQ <$ skipString "==",
-      Expr.BinOp.GEQ <$ skipString ">=",
-      Expr.BinOp.GT <$ skipString ">"
+      .And <$ skipString "and",
+      .Or  <$ skipString "or",
+      .Cat <$ skipString "++",
+      .LT  <$ skipString "<",
+      .LEQ <$ skipString "<=",
+      .EQ  <$ skipString "==",
+      .GEQ <$ skipString ">=",
+      .GT  <$ skipString ">"
     ]
     ws
     let right <- paddLevel
@@ -129,7 +128,6 @@ partial def pbinOp : Parser Expr := do
     return (op, right)
 
   return rest.foldl (fun acc (op, right) => EBinOp op acc right) left
-
 
 partial def pfunCall : Parser Expr := do {
   let name <- pcamelCase
@@ -143,9 +141,19 @@ partial def pfunCall : Parser Expr := do {
 
 partial def pexpr : Parser Expr :=
   choice [
-    pbinOp,
+    pop,
     pliteral,
     pfunCall,
     pvar
   ]
 end
+
+/-
+  tests
+-/
+
+#eval pexpr.run "a_b_ada"
+#eval pexpr.run "faaaa ()"
+#eval pexpr.run "f(x, 3 + y) * 3 + 1"
+#eval pexpr.run "false"
+#eval pexpr.run "true and false"

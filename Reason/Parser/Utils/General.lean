@@ -13,8 +13,11 @@ def pputAfter (val : α) (p : Parser β) : Parser α := do
 
 infixl:30 "<$" => pputAfter
 
--- p.attempt?
 def choice : List (Parser α) -> Parser α
+  | [] => failure
+  | p::ps => p.attempt <|> choice ps
+
+def choice' : List (Parser α) -> Parser α
   | [] => failure
   | p::ps => p <|> choice ps
 
