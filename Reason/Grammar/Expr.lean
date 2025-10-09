@@ -24,7 +24,7 @@ inductive UnOp
 deriving Repr, BEq
 
 inductive BinOp
-  | Add | Mul | Div | Rem
+  | Add | Sub | Mul | Div | Rem
   | And | Or
 
   | Cat
