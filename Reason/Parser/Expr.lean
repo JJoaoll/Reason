@@ -49,7 +49,7 @@ def pvar : Parser Expr
 mutual
 
 -- Parse unary operators (but not negative numbers to avoid conflict)
-unsafe def punOp : Parser Expr := do
+partial def punOp : Parser Expr := do
   let op <- choice [
     Expr.UnOp.Not <$ skipString "not",
     Expr.UnOp.IsLower <$ skipString "isLower",
@@ -62,7 +62,7 @@ unsafe def punOp : Parser Expr := do
   return EUnOp op expr
 
 -- Parse atomic expressions (literals, variables, parenthesized expressions)
-unsafe def patom : Parser Expr := choice [
+partial def patom : Parser Expr := choice [
   pliteral,
   pfunCall,
   pvar,
@@ -70,13 +70,13 @@ unsafe def patom : Parser Expr := choice [
 ]
 
 -- Parse terms (handles unary operators and atoms)
-unsafe def pterm : Parser Expr := choice [
+partial def pterm : Parser Expr := choice [
   punOp,
   patom
 ]
 
 -- Parse multiplication, division, remainder (higher precedence)
-unsafe def pmulLevel : Parser Expr := do
+partial def pmulLevel : Parser Expr := do
   let left <- pterm
   ws
   let rest <- many do
@@ -93,7 +93,7 @@ unsafe def pmulLevel : Parser Expr := do
   return rest.foldl (fun acc (op, right) => EBinOp op acc right) left
 
 -- Parse addition, subtraction (lower precedence)
-unsafe def paddLevel : Parser Expr := do
+partial def paddLevel : Parser Expr := do
   let left <- pmulLevel
   ws
   let rest <- many do
@@ -109,7 +109,7 @@ unsafe def paddLevel : Parser Expr := do
   return rest.foldl (fun acc (op, right) => EBinOp op acc right) left
 
 -- Parse comparison and logical operators (lowest precedence)
-unsafe def pbinOp : Parser Expr := do
+partial def pbinOp : Parser Expr := do
   let left <- paddLevel
   ws
   let rest <- many do
@@ -131,7 +131,7 @@ unsafe def pbinOp : Parser Expr := do
   return rest.foldl (fun acc (op, right) => EBinOp op acc right) left
 
 
-unsafe def pfunCall : Parser Expr := do {
+partial def pfunCall : Parser Expr := do {
   let name <- pcamelCase
 
   skipChar '(';
@@ -141,7 +141,7 @@ unsafe def pfunCall : Parser Expr := do {
   return EFunCall name args
 }
 
-unsafe def pexpr : Parser Expr :=
+partial def pexpr : Parser Expr :=
   choice [
     pbinOp,
     pliteral,
